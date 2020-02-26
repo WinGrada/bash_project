@@ -1,0 +1,56 @@
+#!/bin/bash
+
+Is_diapazon()
+{
+	res=`expr index $1 '-'`
+
+	if [ $res = 0 ];then echo "0" #single user
+		else echo 1									#diapazon users
+	fi
+}
+
+Single_user_del()
+{
+	userdel -r $1 1>/dev/null 2>&1
+	groupdel $2  1>/dev/null 2>&1
+	
+	echo "user $1 deleted successful"
+}
+
+Diapazon_users_del()
+{
+	name_min=`echo $1 |awk -F'-' '{print $1}'`
+	name_max=`echo $1 |awk -F'-' '{print $2}'`
+	name=`echo $name_min |awk -F'[0-9]' '{print $1}'`
+	min_num=`echo $name_min |awk -F"$name" '{print $2}'`
+	max_num=`echo $name_max |awk -F"$name" '{print $2}'`
+
+	for ((j=$min_num;j<=$max_num;j++));do
+		Single_user_del $name$j $2 $3 $4 $5 $6 $7 $8 $9
+	done
+
+	if [ $? = 0 ];then
+		echo "user $1 deleted successful"
+	else
+		echo "ERROR: user $1 don't deleted"
+	fi
+}
+
+fname="/usr/local/bin/userlist.conf"
+cnt=`wc $fname |awk -F' ' '{print $1}'`
+
+for ((k=1;k<=$cnt;k++));do
+	read line
+	case $line in
+		\#* ) : ;;
+		''  ) : ;;
+		*   ) res_diap=`Is_diapazon $line` 
+					if [ $res_diap = 0 ] ;then
+							Single_user_del $line
+						else
+							Diapazon_users_del $line
+					fi
+				;;
+	esac
+done<$fname
+

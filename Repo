@@ -1,0 +1,24 @@
+#! /bin/bash
+cd /etc/yum.repos.d/
+if [ -f local.repo--- ];then
+	mv CentOS-Base.repo CentOS-Base.repo---
+	mv CentOS-CR.repo CentOS-CR.repo---
+	mv CentOS-Debuginfo.repo CentOS-Debuginfo.repo---
+	mv CentOS-fasttrack.repo CentOS-fasttrack.repo---
+	mv CentOS-Media.repo CentOS-Media.repo---
+	mv CentOS-Sources.repo CentOS-Sources.repo---
+	mv CentOS-Vault.repo CentOS-Vault.repo---
+	mv local.repo--- local.repo
+   else
+	mv CentOS-Base.repo--- CentOS-Base.repo
+	mv CentOS-CR.repo--- CentOS-CR.repo
+	mv CentOS-Debuginfo.repo--- CentOS-Debuginfo.repo
+	mv CentOS-fasttrack.repo--- CentOS-fasttrack.repo
+	mv CentOS-Media.repo--- CentOS-Media.repo
+	mv CentOS-Sources.repo--- CentOS-Sources.repo
+	mv CentOS-Vault.repo--- CentOS-Vault.repo
+	mv local.repo local.repo---
+fi
+
+
+

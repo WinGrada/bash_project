@@ -1,0 +1,8 @@
+#!/bin/bash
+cd /usr/local/bin/
+if [ ! -f $1 ];then
+	echo "#!/bin/bash" >$1
+	chmod 755 $1
+fi
+
+nano -T 2 $1

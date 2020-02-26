@@ -1,0 +1,80 @@
+#!/bin/bash
+setenforce 0
+
+pass=1
+echo "$pass" >userpass.txt
+echo "$pass" >>userpass.txt
+
+Is_diapazon()
+{
+	res=`expr index $1 '-'`
+
+	if [ $res = 0 ];then echo "0" #single user
+		else echo 1	#diapazon users
+	fi
+}
+
+Single_user_add()
+{
+
+	mkdir /$2 1>/dev/null 2>&1
+	chgrp $2 /$2
+	chmod 1770 /$2
+	
+
+	groupadd $2 1>/dev/null 2>&1
+
+	list=''
+	ext_group=($3 $4 $5 $6 $7 $8 $9)
+	for ((n=0;n<${#ext_group[*]};n++));do
+		list=$list,${ext_group[n]}
+	done
+
+	if [ ! $list ];then
+		useradd $1 -g $2  1>/dev.null 2>&1
+	else
+		list=`expr substr $list 2 999999`
+		useradd $1 -g $2 -G $list  1>/dev/null 2>&1
+	fi
+
+	if [ $? = 0 ];then
+		echo "user $1 added successful"
+		passwd $1<userpass.txt 1>/dev/null 2>&1
+		chage $1 -d '01-01-01' -m 1 -M 30 -W 5
+	else
+		echo "ERROR: user $1 don't added"
+	fi
+}
+
+Diapazon_users_add()
+{
+	name_min=`echo $1 |awk -F'-' '{print $1}'`
+	name_max=`echo $1 |awk -F'-' '{print $2}'`
+	name=`echo $name_min |awk -F'[0-9]' '{print $1}'`
+	min_num=`echo $name_min |awk -F"$name" '{print $2}'`
+	max_num=`echo $name_max |awk -F"$name" '{print $2}'`
+
+	for ((j=$min_num;j<=$max_num;j++));do
+		Single_user_add $name$j $2 $3 $4 $5 $6 $7 $8 $9
+	done
+}
+
+fname="/usr/local/bin/userlist.conf"
+cnt=`wc $fname |awk -F' ' '{print $1}'`
+
+for ((k=1;k<=$cnt;k++));do
+	read line
+	case $line in
+		\#* ) : ;;
+		''  ) : ;;
+		*   ) res_diap=`Is_diapazon $line` 
+					if [ $res_diap = 0 ] ;then
+							Single_user_add $line
+						else
+							Diapazon_users_add $line
+					fi
+				;;
+	esac
+done<$fname
+rm -rf userpass.txt
+setenforce 1
