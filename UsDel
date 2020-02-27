@@ -1,3 +1,5 @@
+# Удаляет пользователей и группы, которые есть в конфигурационном файле /usr/local/bin/userlist.conf
+
 #!/bin/bash
 
 Is_diapazon()
