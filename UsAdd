@@ -1,3 +1,7 @@
+# Вытягивает даные с конфигурационного файла userlist.conf, который лежит в /usr/local/bin/
+# Скрипт может создавать как диапазон пользователей, так и отдельных пользователей.
+# Так же дополнительно добавляет пользователей в группы(если группы прописаны в userlist.conf)
+
 #!/bin/bash
 setenforce 0
 
@@ -7,48 +11,48 @@ echo "$pass" >>userpass.txt
 
 Is_diapazon()
 {
-	res=`expr index $1 '-'`
+    res=`expr index $1 '-'`
 
-	if [ $res = 0 ];then echo "0" #single user
-		else echo 1	#diapazon users
-	fi
+    if [ $res = 0 ];then echo "0" 	#single user
+	else echo 1						#diapazon users
+    fi
 }
 
 Single_user_add()
 {
 
-	mkdir /$2 1>/dev/null 2>&1
-	chgrp $2 /$2
-	chmod 1770 /$2
+    mkdir /$2 1>/dev/null 2>&1
+    chgrp $2 /$2
+    chmod 1770 /$2
 	
 
-	groupadd $2 1>/dev/null 2>&1
+    groupadd $2 1>/dev/null 2>&1
 
-	list=''
-	ext_group=($3 $4 $5 $6 $7 $8 $9)
-	for ((n=0;n<${#ext_group[*]};n++));do
-		list=$list,${ext_group[n]}
-	done
+    list=''
+    ext_group=($3 $4 $5 $6 $7 $8 $9)
+    for ((n=0;n<${#ext_group[*]};n++));do
+	list=$list,${ext_group[n]}
+    done
 
-	if [ ! $list ];then
-		useradd $1 -g $2  1>/dev.null 2>&1
-	else
-		list=`expr substr $list 2 999999`
-		useradd $1 -g $2 -G $list  1>/dev/null 2>&1
-	fi
+    if [ ! $list ];then
+	useradd $1 -g $2  1>/dev.null 2>&1
+    else
+	list=`expr substr $list 2 999999`
+	useradd $1 -g $2 -G $list  1>/dev/null 2>&1
+   fi
 
-	if [ $? = 0 ];then
-		echo "user $1 added successful"
-		passwd $1<userpass.txt 1>/dev/null 2>&1
-		chage $1 -d '01-01-01' -m 1 -M 30 -W 5
-	else
-		echo "ERROR: user $1 don't added"
-	fi
+   if [ $? = 0 ];then
+	echo "user $1 added successful"
+	passwd $1<userpass.txt 1>/dev/null 2>&1
+	chage $1 -d '01-01-01' -m 1 -M 30 -W 5
+    else
+	echo "ERROR: user $1 don't added"
+    fi
 }
 
 Diapazon_users_add()
 {
-	name_min=`echo $1 |awk -F'-' '{print $1}'`
+    name_min=`echo $1 |awk -F'-' '{print $1}'`
 	name_max=`echo $1 |awk -F'-' '{print $2}'`
 	name=`echo $name_min |awk -F'[0-9]' '{print $1}'`
 	min_num=`echo $name_min |awk -F"$name" '{print $2}'`
@@ -59,7 +63,7 @@ Diapazon_users_add()
 	done
 }
 
-fname="/usr/local/bin/userlist.conf"
+fname="/usr/local/bin/userlist.conf"		# Configure file
 cnt=`wc $fname |awk -F' ' '{print $1}'`
 
 for ((k=1;k<=$cnt;k++));do
